@@ -6,6 +6,7 @@ import 'package:chewie/src/models/options_translation.dart';
 import 'package:chewie/src/models/subtitle_model.dart';
 import 'package:chewie/src/notifiers/player_notifier.dart';
 import 'package:chewie/src/player_with_controls.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -150,6 +151,11 @@ class ChewieState extends State<Chewie> {
       context,
       rootNavigator: widget.controller.useRootNavigator,
     ).push(route);
+
+    if (kIsWeb) {
+      _reInitializeControllers();
+    }
+
     _isFullScreen = false;
     widget.controller.exitFullScreen();
 
@@ -211,8 +217,21 @@ class ChewieState extends State<Chewie> {
 
       /// Otherwise if h == w (square video)
       else {
+        SystemChrome.setPreferredOrientations(DeviceOrientation.values);
       }
     }
+  }
+
+  ///When viewing full screen on web, returning from full screen causes original video to lose the picture.
+  ///We re initialise controllers for web only when returning from full screen
+  void _reInitializeControllers() {
+    final prevPosition = widget.controller.videoPlayerController.value.position;
+    widget.controller.videoPlayerController.initialize().then((_) async {
+      widget.controller._initialize();
+      widget.controller.videoPlayerController.seekTo(prevPosition);
+      await widget.controller.videoPlayerController.play();
+      widget.controller.videoPlayerController.pause();
+    });
   }
 
   @override
@@ -253,6 +272,7 @@ class ChewieController extends ChangeNotifier {
     this.placeholder,
     this.overlay,
     this.showControlsOnInitialize = true,
+    this.showCloseButton = true,
     this.showOptions = true,
     this.optionsBuilder,
     this.additionalOptions,
@@ -301,6 +321,7 @@ class ChewieController extends ChangeNotifier {
     Widget? placeholder,
     Widget? overlay,
     bool? showControlsOnInitialize,
+    bool? showCloseButton,
     bool? showOptions,
     Future<void> Function(BuildContext, List<OptionItem>)? optionsBuilder,
     List<OptionItem> Function(BuildContext)? additionalOptions,
@@ -348,6 +369,7 @@ class ChewieController extends ChangeNotifier {
       placeholder: placeholder ?? this.placeholder,
       overlay: overlay ?? this.overlay,
       showControlsOnInitialize: showControlsOnInitialize ?? this.showControlsOnInitialize,
+      showCloseButton: showCloseButton ?? this.showCloseButton,
       showOptions: showOptions ?? this.showOptions,
       optionsBuilder: optionsBuilder ?? this.optionsBuilder,
       additionalOptions: additionalOptions ?? this.additionalOptions,
@@ -426,8 +448,11 @@ class ChewieController extends ChangeNotifier {
   /// Whether or not the video should loop
   final bool looping;
 
-  /// Wether or not to show the controls when initializing the widget.
+  /// Whether or not to show the controls when initializing the widget.
   final bool showControlsOnInitialize;
+
+  // Whether or not to show an additional close button in the controls
+  final bool showCloseButton;
 
   /// Whether or not to show the controls at all
   final bool showControls;
