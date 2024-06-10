@@ -140,17 +140,15 @@ class _MaterialControlsState extends State<MaterialControls> with SingleTickerPr
   }
 
   Widget _buildActionBar() {
-    return SafeArea(
-      child: AnimatedOpacity(
-        opacity: notifier.hideStuff ? 0.0 : 1.0,
-        duration: const Duration(milliseconds: 250),
-        child: Row(
-          children: [
-            if (chewieController.showCloseButton) ...[_buildCloseButton(), const Spacer()],
-            _buildSubtitleToggle(),
-            if (chewieController.showOptions) _buildOptionsButton(),
-          ],
-        ),
+    return AnimatedOpacity(
+      opacity: notifier.hideStuff ? 0.0 : 1.0,
+      duration: const Duration(milliseconds: 250),
+      child: Row(
+        children: [
+          if (chewieController.showCloseButton) ...[_buildCloseButton(), const Spacer()],
+          _buildSubtitleToggle(),
+          if (chewieController.showOptions) _buildOptionsButton(),
+        ],
       ),
     );
   }
@@ -254,7 +252,6 @@ class _MaterialControlsState extends State<MaterialControls> with SingleTickerPr
           bottom: !chewieController.isFullScreen ? 10.0 : 0,
         ),
         child: SafeArea(
-          top: false,
           bottom: chewieController.isFullScreen,
           minimum: chewieController.controlsSafeAreaMinimum,
           child: Column(

@@ -14,89 +14,67 @@ class PlayerWithControls extends StatelessWidget {
   Widget build(BuildContext context) {
     final ChewieController chewieController = ChewieController.of(context);
 
-    double calculateAspectRatio(BuildContext context) {
-      final size = MediaQuery.of(context).size;
-      final width = size.width;
-      final height = size.height;
-
-      return width > height ? width / height : height / width;
-    }
-
     Widget buildControls(BuildContext context, ChewieController chewieController) {
       return chewieController.showControls
           ? chewieController.customControls ?? const AdaptiveControls()
-          : const SizedBox();
+          : const SizedBox.shrink();
     }
 
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
       return Center(
-        child: SizedBox(
-          height: constraints.maxHeight,
-          width: constraints.maxWidth,
-          child: AspectRatio(
-            aspectRatio: calculateAspectRatio(context),
-            child: Stack(
-              children: <Widget>[
-                if (chewieController.placeholder != null) chewieController.placeholder!,
-                InteractiveViewer(
-                  transformationController: chewieController.transformationController,
-                  maxScale: chewieController.maxScale,
-                  panEnabled: chewieController.zoomAndPan,
-                  scaleEnabled: chewieController.zoomAndPan,
-                  child: Center(
-                    child: AspectRatio(
-                      aspectRatio:
-                          chewieController.aspectRatio ?? chewieController.videoPlayerController.value.aspectRatio,
-                      child: Builder(
-                        builder: (BuildContext context) {
-                          final VideoPlayer player = VideoPlayer(chewieController.videoPlayerController);
-                          final int rotationCorrection =
-                              chewieController.videoPlayerController.value.rotationCorrection;
-                          print('rotationCorrection: $rotationCorrection');
-                          if (rotationCorrection == 180) {
-                            return Transform.rotate(
-                              angle: rotationCorrection * math.pi / 180,
-                              child: player,
-                            );
-                          }
+        child: Stack(
+          children: <Widget>[
+            if (chewieController.placeholder != null) chewieController.placeholder!,
+            InteractiveViewer(
+              transformationController: chewieController.transformationController,
+              maxScale: chewieController.maxScale,
+              panEnabled: chewieController.zoomAndPan,
+              scaleEnabled: chewieController.zoomAndPan,
+              child: Center(
+                child: AspectRatio(
+                  aspectRatio: chewieController.aspectRatio ?? chewieController.videoPlayerController.value.aspectRatio,
+                  child: Builder(
+                    builder: (BuildContext context) {
+                      final VideoPlayer player = VideoPlayer(chewieController.videoPlayerController);
+                      final int rotationCorrection = chewieController.videoPlayerController.value.rotationCorrection;
+                      if (rotationCorrection == 180) {
+                        return Transform.rotate(
+                          angle: rotationCorrection * math.pi / 180,
+                          child: player,
+                        );
+                      }
 
-                          return player;
-                        },
-                      ),
+                      return player;
+                    },
+                  ),
+                ),
+              ),
+            ),
+            if (chewieController.overlay != null) chewieController.overlay!,
+            if (Theme.of(context).platform != TargetPlatform.iOS)
+              Consumer<PlayerNotifier>(
+                builder: (
+                  BuildContext context,
+                  PlayerNotifier notifier,
+                  Widget? widget,
+                ) =>
+                    Visibility(
+                  visible: !notifier.hideStuff,
+                  child: AnimatedOpacity(
+                    opacity: notifier.hideStuff ? 0.0 : 0.8,
+                    duration: const Duration(milliseconds: 250),
+                    child: const DecoratedBox(
+                      decoration: BoxDecoration(color: Colors.black54),
+                      child: SizedBox.expand(),
                     ),
                   ),
                 ),
-                if (chewieController.overlay != null) chewieController.overlay!,
-                if (Theme.of(context).platform != TargetPlatform.iOS)
-                  Consumer<PlayerNotifier>(
-                    builder: (
-                      BuildContext context,
-                      PlayerNotifier notifier,
-                      Widget? widget,
-                    ) =>
-                        Visibility(
-                      visible: !notifier.hideStuff,
-                      child: AnimatedOpacity(
-                        opacity: notifier.hideStuff ? 0.0 : 0.8,
-                        duration: const Duration(milliseconds: 250),
-                        child: const DecoratedBox(
-                          decoration: BoxDecoration(color: Colors.black54),
-                          child: SizedBox.expand(),
-                        ),
-                      ),
-                    ),
-                  ),
-                if (!chewieController.isFullScreen)
-                  buildControls(context, chewieController)
-                else
-                  SafeArea(
-                    bottom: false,
-                    minimum: chewieController.controlsSafeAreaMinimum,
-                    child: buildControls(context, chewieController),
-                  ),
-              ],
+              ),
+            SafeArea(
+              bottom: !chewieController.isFullScreen,
+              child: buildControls(context, chewieController),
             ),
-          ),
+          ],
         ),
       );
     });
