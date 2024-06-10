@@ -22,10 +22,7 @@ class PlayerWithControls extends StatelessWidget {
       return width > height ? width / height : height / width;
     }
 
-    Widget buildControls(
-      BuildContext context,
-      ChewieController chewieController,
-    ) {
+    Widget buildControls(BuildContext context, ChewieController chewieController) {
       return chewieController.showControls
           ? chewieController.customControls ?? const AdaptiveControls()
           : const SizedBox();
@@ -94,6 +91,7 @@ class PlayerWithControls extends StatelessWidget {
                 else
                   SafeArea(
                     bottom: false,
+                    minimum: chewieController.controlsSafeAreaMinimum,
                     child: buildControls(context, chewieController),
                   ),
               ],
