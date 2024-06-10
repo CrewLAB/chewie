@@ -272,6 +272,7 @@ class ChewieController extends ChangeNotifier {
     this.placeholder,
     this.overlay,
     this.showControlsOnInitialize = true,
+    this.showCloseButton = true,
     this.showOptions = true,
     this.optionsBuilder,
     this.additionalOptions,
@@ -320,6 +321,7 @@ class ChewieController extends ChangeNotifier {
     Widget? placeholder,
     Widget? overlay,
     bool? showControlsOnInitialize,
+    bool? showCloseButton,
     bool? showOptions,
     Future<void> Function(BuildContext, List<OptionItem>)? optionsBuilder,
     List<OptionItem> Function(BuildContext)? additionalOptions,
@@ -367,6 +369,7 @@ class ChewieController extends ChangeNotifier {
       placeholder: placeholder ?? this.placeholder,
       overlay: overlay ?? this.overlay,
       showControlsOnInitialize: showControlsOnInitialize ?? this.showControlsOnInitialize,
+      showCloseButton: showCloseButton ?? this.showCloseButton,
       showOptions: showOptions ?? this.showOptions,
       optionsBuilder: optionsBuilder ?? this.optionsBuilder,
       additionalOptions: additionalOptions ?? this.additionalOptions,
@@ -445,8 +448,11 @@ class ChewieController extends ChangeNotifier {
   /// Whether or not the video should loop
   final bool looping;
 
-  /// Wether or not to show the controls when initializing the widget.
+  /// Whether or not to show the controls when initializing the widget.
   final bool showControlsOnInitialize;
+
+  // Whether or not to show an additional close button in the controls
+  final bool showCloseButton;
 
   /// Whether or not to show the controls at all
   final bool showControls;
