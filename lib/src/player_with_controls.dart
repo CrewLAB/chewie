@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:chewie/src/chewie_player.dart';
 import 'package:chewie/src/helpers/adaptive_controls.dart';
 import 'package:chewie/src/notifiers/index.dart';
@@ -48,7 +50,22 @@ class PlayerWithControls extends StatelessWidget {
                     child: AspectRatio(
                       aspectRatio:
                           chewieController.aspectRatio ?? chewieController.videoPlayerController.value.aspectRatio,
-                      child: VideoPlayer(chewieController.videoPlayerController),
+                      child: Builder(
+                        builder: (BuildContext context) {
+                          final VideoPlayer player = VideoPlayer(chewieController.videoPlayerController);
+                          final int rotationCorrection =
+                              chewieController.videoPlayerController.value.rotationCorrection;
+                          print('rotationCorrection: $rotationCorrection');
+                          if (rotationCorrection == 180) {
+                            return Transform.rotate(
+                              angle: rotationCorrection * math.pi / 180,
+                              child: player,
+                            );
+                          }
+
+                          return player;
+                        },
+                      ),
                     ),
                   ),
                 ),
